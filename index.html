@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مقارنة المدن — أسعار + مسافات 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.09);
+  --text:#f1f5f9;--note:#94a3b8;--sub:#64748b;--dim:#475569;
+  --active:#38bdf8;--radius:12px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Cairo','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 0 50px}
+/* NAV */
+.main-nav{display:flex;justify-content:center;padding:16px 14px 0;margin-bottom:18px;gap:0}
+.nav-btn{padding:10px 26px;border:none;background:rgba(255,255,255,0.05);color:var(--sub);
+  font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;white-space:nowrap}
+.nav-btn:first-child{border-radius:var(--radius) 0 0 0}.nav-btn:last-child{border-radius:0 var(--radius) 0 0}
+.nav-btn.active{color:var(--active);border-bottom-color:var(--active);background:color-mix(in srgb,var(--active) 12%,transparent)}
+.page{display:none;padding:0 14px}.page.active{display:block}
+/* CITY TABS */
+.city-tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+.ctab{padding:8px 15px;border-radius:20px;border:1.5px solid var(--dim);background:transparent;
+  color:var(--sub);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;white-space:nowrap}
+.ctab.active{border-color:var(--active);background:color-mix(in srgb,var(--active) 14%,transparent);color:var(--active)}
+/* HEADER */
+.city-header{text-align:center;margin-bottom:16px}
+.city-header h2{font-size:clamp(16px,4vw,21px);font-weight:900;margin-bottom:3px;
+  background:linear-gradient(135deg,var(--active),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.city-header p{font-size:11px;color:var(--sub)}
+/* SUMMARY */
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.card{background:var(--surface);border-radius:10px;padding:10px 8px;text-align:center;border:1px solid var(--border)}
+.card .val{font-size:clamp(14px,4vw,18px);font-weight:800;margin-bottom:2px}
+.card .lbl{font-size:10px;color:var(--note)}
+/* ACCORDION */
+.district-block{margin-bottom:8px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.district-header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;
+  cursor:pointer;transition:background .2s;user-select:none}
+.district-header:hover{background:rgba(255,255,255,0.04)}
+.district-title{font-size:13px;font-weight:800}
+.district-meta{font-size:11px;color:var(--note);margin-top:1px}
+.district-arrow{font-size:11px;color:var(--note);transition:transform .25s;flex-shrink:0}
+.district-arrow.open{transform:rotate(180deg)}
+/* COMPOUND TABLE */
+.compound-table{width:100%;border-collapse:collapse;font-size:11px;display:none}
+.compound-table.open{display:table}
+.compound-table th{padding:8px 12px;text-align:right;color:var(--note);font-weight:700;
+  background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);white-space:nowrap;font-size:10px}
+.compound-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle}
+.compound-table tr:last-child td{border-bottom:none}
+.compound-table tr:hover td{background:rgba(255,255,255,0.03)}
+/* AVG row */
+.avg-row td{background:rgba(255,255,255,0.07)!important}
+.avg-row .cname{font-size:12px}
+/* CELL STYLES */
+.cname{font-weight:700;color:var(--text);font-size:11px;line-height:1.3}
+.dev-txt{color:var(--note);font-size:10px;margin-top:1px}
+.cell-note{color:var(--note);font-size:10px;line-height:1.4}
+.price-badge{display:inline-block;padding:3px 8px;border-radius:8px;font-weight:800;font-size:10px;white-space:nowrap}
+/* WA LINK */
+.wa-btn{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:6px;
+  background:rgba(37,211,102,0.15);color:#25d366;font-size:9px;font-weight:700;
+  text-decoration:none;margin-top:3px;transition:background .2s;white-space:nowrap}
+.wa-btn:hover{background:rgba(37,211,102,0.28)}
+.ref-btn{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:6px;
+  background:rgba(148,163,184,0.12);color:var(--note);font-size:9px;font-weight:700;
+  text-decoration:none;margin-top:3px;transition:background .2s}
+.ref-btn:hover{background:rgba(148,163,184,0.22)}
+/* LEGEND */
+.legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:10px;color:var(--note);margin-top:10px}
+.leg-i{display:flex;align-items:center;gap:4px}.leg-dot{width:9px;height:9px;border-radius:2px}
+.footnote{text-align:center;margin-top:10px;font-size:10px;color:var(--sub);line-height:1.7}
+/* PAGE 2 */
+.dist-title{text-align:center;margin-bottom:18px;padding-top:4px}
+.dist-title h2{font-size:20px;font-weight:900;
+  background:linear-gradient(135deg,#f472b6,#fb923c,#38bdf8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.dist-title p{font-size:12px;color:var(--sub)}
+/* COMPOUND SPOTLIGHT CARDS */
+.spotlight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:14px}
+.spotlight-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.spotlight-header{padding:12px 15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.spotlight-icon{font-size:22px}
+.spotlight-name{font-size:13px;font-weight:800;color:var(--text)}
+.spotlight-sub{font-size:10px;color:var(--note);margin-top:1px}
+.spot-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;padding:9px 15px;
+  align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);transition:background .15s}
+.spot-row:last-child{border-bottom:none}.spot-row:hover{background:rgba(255,255,255,0.04)}
+.city-badge{font-size:10px;font-weight:800;padding:3px 7px;border-radius:10px;white-space:nowrap}
+.dist-bar-wrap{display:flex;align-items:center;gap:5px;flex:1}
+.dist-bar-track{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden}
+.dist-bar-fill{height:100%;border-radius:3px;transition:width .5s}
+.dist-km{font-size:11px;font-weight:700;white-space:nowrap;min-width:36px;text-align:left;direction:ltr}
+.dist-min{font-size:10px;color:var(--note);white-space:nowrap;min-width:34px;text-align:left;direction:ltr}
+/* AIRPORT + MALL */
+.dest-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.dest-header{padding:11px 15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.dest-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;padding:9px 15px;
+  align-items:center;border-bottom:1px solid rgba(255,255,255,0.05)}
+.dest-row:last-child{border-bottom:none}.dest-row:hover{background:rgba(255,255,255,0.04)}
+.two-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:14px}
+/* DEGLA */
+.degla-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+.degla-header{padding:11px 15px;background:rgba(251,146,60,0.08);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.degla-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;padding:10px 15px;
+  align-items:center;border-bottom:1px solid rgba(255,255,255,0.05)}
+.degla-row:last-child{border-bottom:none}
+/* COMPARE */
+.compare-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px}
+.compare-table{width:100%;border-collapse:collapse;font-size:11px}
+.compare-table th{background:rgba(255,255,255,0.07);color:var(--active);font-weight:800;
+  padding:10px 11px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+.compare-table td{padding:10px 11px;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle;color:var(--text)}
+.compare-table tr:last-child td{border-bottom:none}
+.compare-table tr:hover td{background:rgba(255,255,255,0.03)}
+.score-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:5px}
+.best{color:#4ade80;font-weight:800}.worst{color:#f87171}
+@media(max-width:540px){
+  .spotlight-grid,.two-grid{grid-template-columns:1fr}
+  .spot-row,.dest-row,.degla-row{grid-template-columns:auto 1fr auto}
+  .dist-min{display:none}
+  .compound-table th:last-child,.cell-note{display:none}
+  .compound-table td:last-child{display:none}
+  .compound-table{font-size:10px}
+  .main-nav{gap:4px}.nav-btn{padding:9px 12px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<div class="main-nav">
+  <button class="nav-btn active" data-page="prices">🏠 أسعار المتر</button>
+  <button class="nav-btn"        data-page="distances">📍 مسافات وخدمات</button>
+</div>
+
+<div class="page active" id="page-prices">
+  <div class="city-tabs" id="city-tabs"></div>
+  <div class="city-header"><h2 id="city-h2"></h2><p>تقديرات 2026 · جنيه مصري / م²</p></div>
+  <div class="summary" id="summary"></div>
+  <div id="price-content"></div>
+  <div class="legend">
+    <div class="leg-i"><div class="leg-dot" style="background:rgba(255,255,255,0.2)"></div><span>★ متوسط الحي</span></div>
+    <div class="leg-i"><div class="leg-dot" id="leg-mid"></div><span>كمبوند متوسط</span></div>
+    <div class="leg-i"><div class="leg-dot" style="background:#f472b6"></div><span>كمبوند فاخر</span></div>
+    <div class="leg-i"><div class="leg-dot" style="background:#25d366"></div><span>واتساب مباشر</span></div>
+  </div>
+  <div class="footnote">
+    مصادر: aldiyaralasrea مارس 2026 · newaqar يناير 2026 · عقارماب فبراير 2025 · aqarsky يناير 2026 · judran-eg · mishwaronline مايو 2026<br>
+    ★ = رقم مؤكد من مصدر | الأرقام الأخرى تقديرات | أسعار الكمبوندات: آخر سعر طرح متاح من المطور
+  </div>
+</div>
+
+<div class="page" id="page-distances">
+  <div class="dist-title"><h2>📍 مسافات وخدمات</h2><p>بالسيارة بدون زحمة · المسافات تقريبية</p></div>
+
+  <!-- SPOTLIGHT COMPOUNDS -->
+  <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px;padding:0 2px">
+    🏙️ المسافة من كل مدينة إلى كمبوندات مرجعية
+  </div>
+  <div class="spotlight-grid" id="spotlight-grid"></div>
+
+  <!-- AIRPORT + NEAREST MALL -->
+  <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px;padding:0 2px">
+    ✈️ المطار وأقرب مول كبير
+  </div>
+  <div class="two-grid" id="two-grid"></div>
+
+  <!-- WADI DEGLA -->
+  <div class="degla-card">
+    <div class="degla-header">
+      <span style="font-size:22px">🏊</span>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#fb923c">نادي وادي دجلة — أقرب فرع فعلي</div>
+        <div style="font-size:10px;color:var(--note)">لا يوجد فرع داخل العاصمة الإدارية حتى مايو 2026 ⚠️</div>
+      </div>
+    </div>
+    <div id="degla-rows"></div>
+  </div>
+
+  <!-- COMPARE TABLE -->
+  <div class="compare-title">📊 جدول المقارنة الشاملة</div>
+  <div style="overflow-x:auto"><table class="compare-table" id="compare-table"></table></div>
+  <div class="footnote" style="margin-top:10px">
+    المسافات تقريبية · Google Maps · propertyfinder.eg · المولات: أقرب مول كبير لكل مدينة داخلها أو على حدودها
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   PRICE DATA
+══════════════════════════════════════ */
+const CITIES = {
+  obour:{label:"العبور (القديمة)",emoji:"🏙️",color:"#38bdf8",avgCity:21700,minAll:8000,maxAll:88000,
+    districts:[
+      {id:"ob_comp",name:"كمبوندات العبور",color:"#38bdf8",avg:45000,
+       compounds:[
+        {n:"أوكارديا (O Kardia)", dev:"FUD Developments",    price:"16,000–88,000", note:"ح8 | أمام كارفور الجديد | خط 10 | مقدم 10%", wa:"201023008098", ref:"https://aldiyaralasrea.com/obour/okardia/"},
+        {n:"ريفيل",              dev:"معمار الأشراف",         price:"17,000–38,000", note:"ح6 | 60–400م | سكن + إداري", wa:null, ref:"https://aqarsky.com/اسماء-كمبوندات-العبور/"},
+        {n:"روك فيل",            dev:"شركة البطل",            price:"20,000–35,000", note:"ح5 | قريب جمعية عرابي | فيلات", wa:null, ref:"https://aqaryamasr.com/blog/كمبوندات-العبور"},
+        {n:"مرتقى العبور",       dev:"مرتقى العقارية",        price:"25,000–40,000", note:"ح7 | فيلات مستقلة أمام جولف سيتي", wa:null, ref:"https://newstart-eg.com/project/مدينة-العبور/murtaqa"},
+        {n:"سيتاليا",            dev:"فاليرو للتطوير",        price:"17,000–28,000", note:"بالقرب من جولف سيتي | 60–400م", wa:null, ref:"https://aqarsky.com/اسماء-كمبوندات-العبور/"},
+        {n:"أورو العبور",        dev:"فاليرو للتطوير",        price:"16,000–26,000", note:"شقق + دوبلكس + ستوديو", wa:null, ref:"https://aqarsky.com/اسماء-كمبوندات-العبور/"},
+       ]},
+      {id:"ob9",name:"الحي التاسع",color:"#7dd3fc",avg:19850,
+       compounds:[
+        {n:"دار مصر",    dev:"هيئة المجتمعات العمرانية", price:"12,000–18,000", note:"إسكان متوسط حكومي ★",         wa:null, ref:"https://aqarmap.com.eg/ar/for-sale/apartment/cairo/al-oubour/el-hay-el-tamen/"},
+        {n:"بيت الوطن", dev:"هيئة المجتمعات العمرانية", price:"12,000–16,000", note:"مشروع حكومي متكامل",           wa:null, ref:"https://aqarmap.com.eg/ar/for-sale/apartment/cairo/al-oubour/"},
+       ]},
+      {id:"ob8",name:"الحي الثامن",color:"#93c5fd",avg:15900,
+       compounds:[
+        {n:"أوكارديا",  dev:"FUD Developments",          price:"16,000–24,000", note:"مؤكد 15,900/م ★ | أمام كارفور الجديد", wa:"201023008098", ref:"https://aldiyaralasrea.com/obour/okardia/"},
+       ]},
+      {id:"ob7",name:"الحي السابع",color:"#60a5fa",avg:25000,
+       compounds:[
+        {n:"جولف سيتي", dev:"هيئة المجتمعات / Golf Obour", price:"18,000–35,000", note:"نادي جولف + فيلات + الأرقى بالعبور", wa:null, ref:"https://aqarmap.com.eg/ar/for-sale/apartment/cairo/al-oubour/"},
+        {n:"مرتقى",     dev:"مرتقى العقارية",              price:"25,000–40,000", note:"فيلات مستقلة فقط أمام جولف سيتي",   wa:null, ref:"https://newstart-eg.com/project/مدينة-العبور/murtaqa"},
+       ]},
+      {id:"ob_gov",name:"إسكان حكومي (أحياء 1–4–شباب)",color:"#94a3b8",avg:12000,
+       compounds:[
+        {n:"سكن مصر",       dev:"هيئة المجتمعات",    price:"10,000–15,000", note:"أحياء متعددة | تقسيط حكومي", wa:null, ref:"https://aqarmap.com.eg/ar/for-sale/apartment/cairo/al-oubour/"},
+        {n:"إسكان الشباب",  dev:"وزارة الإسكان",     price:"8,000–12,000",  note:"وحدات اقتصادية 63–100م",     wa:null, ref:"https://aqarmap.com.eg/ar/for-sale/apartment/cairo/al-oubour/"},
+       ]},
+    ]
+  },
+
+  shorouk:{label:"مدينة الشروق",emoji:"🌿",color:"#4ade80",avgCity:18000,minAll:7000,maxAll:85000,
+    districts:[
+      {id:"sh_sws",name:"طريق السويس (حدود المدينة)",color:"#f472b6",avg:42000,
+       compounds:[
+        {n:"الباتيو سولا",  dev:"لافيستا للتطوير",                  price:"65,000–85,000", note:"45 فدان مقابل مدينتي | يبدأ 75,000/م ★",  wa:null,         ref:"https://realestate-capsule.com/blog/elsherouk-city-compounds/"},
+        {n:"Livyn",         dev:"نخيل للتطوير (Nakheel Dev)",        price:"35,000–42,000", note:"19.5 فدان | 77–196م | يبدأ 37,500/م ★",   wa:"201278509414",ref:"https://alkayanpremium.com/property/livyn-el-shorouk/"},
+        {n:"الباتيو كازا",  dev:"لافيستا للتطوير",                  price:"30,000–45,000", note:"700م من مدخل الشروق 2 | نادي هليوبوليس",  wa:null,         ref:"https://realestate-capsule.com/blog/elsherouk-city-compounds/"},
+        {n:"المعادي فيو",   dev:"أجيك للتطوير",                    price:"28,000–35,000", note:"متوسط 29,000/م ★",                          wa:null,         ref:"https://betterhouseproperty.com/aprtments-prices-in-new-capital/"},
+        {n:"بالم كابيتال",  dev:"TG للتطوير",                      price:"24,500–38,000", note:"بجوار سوديك إيست | يبدأ 24,500/م ★",       wa:null,         ref:"https://betterhouseproperty.com/aprtments-prices-in-new-capital/"},
+       ]},
+      {id:"sh5",name:"الحي الخامس (الجوهرة)",color:"#4ade80",avg:22000,
+       compounds:[
+        {n:"جراندا لايف",  dev:"إيجي جاب للتطوير",    price:"22,000–32,000", note:"19 فدان | سمارت هوم | 150–234م",          wa:null, ref:"https://realestate-capsule.com/blog/elsherouk-city-compounds/"},
+        {n:"كليوباترا بالاس",dev:"Capital Group الإماراتية", price:"14,000–24,000", note:"يبدأ 10,629/م ★ | طريق السويس",    wa:null, ref:"https://realestate-capsule.com/blog/elsherouk-city-compounds/"},
+        {n:"وادي الربيع",  dev:"متعدد",               price:"12,000–20,000", note:"أرخص كمبوند في الشروق | 37 فدان ★",      wa:null, ref:"https://thebrokermaprealestate.com/blog/ارخص-كمبوند-فى-الشروق/"},
+       ]},
+      {id:"sh_nad",name:"حي النادي (العقيق) والبروج",color:"#86efac",avg:19000,
+       compounds:[
+        {n:"البروج",  dev:"إمكان مصر / Capital Group",  price:"11,500–20,000", note:"1200 فدان | 28,000 وحدة | الأكبر في الشروق ★", wa:null, ref:"https://aqarland.net/new-cairo-city/al-burouj-compound/"},
+       ]},
+      {id:"sh_wall",name:"وصال",color:"#6ee7b7",avg:22000,
+       compounds:[
+        {n:"وصال",  dev:"فاوندرز + الأهلي صبور + البنك الأهلي", price:"18,000–28,000", note:"800 فدان | مدينة سكنية متكاملة", wa:null, ref:"https://realestate-capsule.com/city/elshorouk/"},
+       ]},
+      {id:"sh_inv",name:"إسكان استثماري / المنطقة الأولى",color:"#a7f3d0",avg:18500,
+       compounds:[
+        {n:"الشروق سبرنجز",          dev:"متعدد",  price:"7,000–14,000",  note:"أرخص كمبوند في الشروق | يبدأ 7,000/م ★",    wa:null, ref:"https://realestate-capsule.com/blog/elsherouk-city-compounds/"},
+        {n:"الجار برتش ديستريكت",    dev:"متعدد",  price:"14,000–22,000", note:"تشطيب فندقي | يبدأ 3.2 مليون ج",             wa:null, ref:"https://realestate-capsule.com/blog/elsherouk-city-compounds/"},
+        {n:"سكاي بلازا",             dev:"متعدد",  price:"12,000–20,000", note:"بجوار الجامعة البريطانية | 50,000م²",         wa:null, ref:"https://darmisr.com/articles-interest-you/مولات-مدينة-الشروق/"},
+       ]},
+      {id:"sh_other",name:"الأحياء الاقتصادية (الثاني–الرابع–إسكان شباب)",color:"#94a3b8",avg:13500,
+       compounds:[
+        {n:"هيئة المجتمعات (ياقوت/ماسة)", dev:"حكومي", price:"8,000–14,000", note:"إسكان متوسط في الأحياء الأقدم",  wa:null, ref:"https://aqarmap.com.eg/ar/for-sale/apartment/cairo/el-shorouk/"},
+        {n:"إسكان الشباب",                dev:"حكومي", price:"7,000–12,000", note:"63–100م | الأقل سعراً بالمدينة", wa:null, ref:"https://aqarmap.com.eg/ar/for-sale/apartment/cairo/el-shorouk/"},
+       ]},
+    ]
+  },
+
+  newobour:{label:"العبور الجديدة",emoji:"🏗️",color:"#fb923c",avgCity:16000,minAll:6000,maxAll:40000,
+    districts:[
+      {id:"no_comp",name:"كمبوندات خاصة",color:"#fb923c",avg:27000,
+       compounds:[
+        {n:"ريفيل",          dev:"معمار الأشراف",      price:"17,000–38,000", note:"الأرقى | 60–400م | متعدد الأنشطة ★", wa:null, ref:"https://www.newaqar.net/مشاريع-r8/"},
+        {n:"هاي سيتي",       dev:"الصفوة للتطوير",     price:"18,000–28,000", note:"36 فدان | 60 عمارة | مقدم 15% ★",     wa:null, ref:"https://www.newaqar.net/كمبوندات-العبور/"},
+        {n:"سيرينتي",        dev:"معمار الأشراف",      price:"16,000–25,000", note:"13 فدان | 64–180م ★",                  wa:null, ref:"https://www.newaqar.net/كمبوندات-العبور/"},
+        {n:"بيت الوطن",      dev:"هيئة المجتمعات",     price:"13,000–22,000", note:"5 مناطق | قيد التطوير | 125م+",        wa:null, ref:"https://www.newaqar.net/كمبوندات-العبور/"},
+       ]},
+      {id:"no_gov",name:"إسكان حكومي (سكن مصر – الحرية – المجد)",color:"#fdba74",avg:12000,
+       compounds:[
+        {n:"سكن مصر",       dev:"هيئة المجتمعات",  price:"12,000–18,000", note:"طرح 6,915/م (2023) → سوق ~16k (2026) ★",  wa:null, ref:"https://www.newaqar.net/كمبوندات-العبور/"},
+        {n:"حي الحرية",     dev:"وزارة الإسكان",   price:"9,000–15,000",  note:"255 عمارة | 90م | طرح 4,666/م (2022) ★",  wa:null, ref:"https://www.newaqar.net/كمبوندات-العبور/"},
+        {n:"الإسكان المتميز",dev:"وزارة الإسكان",  price:"9,000–14,000",  note:"طرح 8,922/م (2024) → سوق ~12.5k ★",       wa:null, ref:"https://www.newaqar.net/كمبوندات-العبور/"},
+        {n:"حي المجد",      dev:"وزارة الإسكان",   price:"7,000–12,000",  note:"188 عمارة | طرح 3,400 → سوق ~10.5k",       wa:null, ref:"https://www.newaqar.net/كمبوندات-العبور/"},
+        {n:"حي الكرامة",    dev:"وزارة الإسكان",   price:"7,000–12,000",  note:"210 عمارة | بين سكن مصر والمجد",           wa:null, ref:"https://www.newaqar.net/كمبوندات-العبور/"},
+        {n:"الإسكان العائلي",dev:"وزارة الإسكان",  price:"6,000–10,000",  note:"للأسر الصغيرة | الأقل سعراً",              wa:null, ref:"https://www.newaqar.net/كمبوندات-العبور/"},
+       ]},
+    ]
+  },
+
+  capital:{label:"العاصمة الإدارية",emoji:"🏛️",color:"#c084fc",avgCity:38000,minAll:5500,maxAll:130000,
+    districts:[
+      {id:"cap_dt",name:"الداون تاون / MU23",color:"#f472b6",avg:75000,
+       compounds:[
+        {n:"البرج الأيقوني",   dev:"CSCEC الصينية",     price:"120,000+",      note:"385م | أعلى برج أفريقيا | تجاري/سكني/فندقي", wa:null, ref:"https://egyptnewcapital.com/"},
+        {n:"Midtown Sky",      dev:"Peter Home",          price:"38,000–55,000", note:"R7/G3 | 122 فدان | يبدأ 40,000/م ★",         wa:null, ref:"https://betterhouseproperty.com/aprtments-prices-in-new-capital/"},
+        {n:"Midtown Condo",    dev:"Better Home",         price:"10,200–18,000", note:"أرخص وحدات | يبدأ 10,200/م ★",               wa:null, ref:"https://betterhouseproperty.com/aprtments-prices-in-new-capital/"},
+       ]},
+      {id:"cap_r8",name:"R8 — الحي السكني الثامن",color:"#c084fc",avg:55000,
+       compounds:[
+        {n:"De Joya 1 & 2",  dev:"تاج مصر",                   price:"60,000–88,000", note:"R8/B2 | يبدأ 64,071/م ★",              wa:null, ref:"https://platform-realestateeg.com/دليل-أفضل-مشاريع-r8-العاصمة-الإدارية/"},
+        {n:"De Joya 4",      dev:"تاج مصر",                   price:"40,000–55,000", note:"R8 | يبدأ 44,500/م ★",                  wa:null, ref:"https://platform-realestateeg.com/دليل-أفضل-مشاريع-r8-العاصمة-الإدارية/"},
+        {n:"MBG Compound",   dev:"MBG Developments",          price:"42,000–65,000", note:"R8 | أول قطعة المحور المركزي ★",         wa:null, ref:"https://mishwaronline.com/r8-العاصمة-الإدارية/"},
+        {n:"Dubai NC",       dev:"Dubai للتطوير",             price:"38,000–55,000", note:"R8 | كريستال لاجون | يبدأ 40,000/م ★",  wa:null, ref:"https://mishwaronline.com/r8-العاصمة-الإدارية/"},
+        {n:"The Islands",    dev:"مطور خاص",                 price:"42,000–60,000", note:"R8 | يبدأ المتر 42,000 ★",               wa:null, ref:"https://aqarsky.com/اسماء-كمبوندات-العاصمة-الإدارية-الجدي/"},
+        {n:"Lagoons NC",     dev:"متعدد",                    price:"35,000–55,000", note:"R8/H4 | 60 فدان | أكبر لاجونز",           wa:null, ref:"https://mishwaronline.com/r8-العاصمة-الإدارية/"},
+        {n:"SAGE Lakes",     dev:"سكويرز للتطوير",           price:"25,000–38,000", note:"R8/M6 | يبدأ 1.37م ج | مقدم 2.5% ★",    wa:null, ref:"https://platform-realestateeg.com/دليل-أفضل-مشاريع-r8-العاصمة-الإدارية/"},
+        {n:"Canyon 8",       dev:"Hometown Developments",    price:"28,000–42,000", note:"R8 | قريب مطار العاصمة",                  wa:null, ref:"https://platform-realestateeg.com/دليل-أفضل-مشاريع-r8-العاصمة-الإدارية/"},
+        {n:"ضفاف",           dev:"مطور خاص",                 price:"45,000–80,000", note:"R8 | مباشر على النهر الأخضر",             wa:null, ref:"https://mishwaronline.com/r8-العاصمة-الإدارية/"},
+        {n:"Dominar",        dev:"دومينار للتطوير",          price:"28,000–42,000", note:"R8 | 31 فدان | محور مركزي 90م",           wa:null, ref:"https://www.newcapital-projects.com/كمبوند-دومينار-العاصمة-الادارية/"},
+       ]},
+      {id:"cap_r7",name:"R7 — الحي السكني السابع",color:"#a78bfa",avg:35000,
+       compounds:[
+        {n:"دي جويا 3",    dev:"تاج مصر",                  price:"45,000–65,000", note:"R7/E1 | 33 فدان | يبدأ 52,500/م ★",   wa:null, ref:"https://betterhouseproperty.com/dejoya3-new-capital/"},
+        {n:"طلة",          dev:"نيو بلان",                 price:"40,000–55,000", note:"R7 | 30 فدان | يبدأ 47,000/م ★",       wa:null, ref:"https://betterhouseproperty.com/aprtments-prices-in-new-capital/"},
+        {n:"ميدتاون سكاي", dev:"Peter Home",               price:"38,000–55,000", note:"R7/G3 | 122 فدان | يبدأ 40,000/م ★",  wa:null, ref:"https://betterhouseproperty.com/aprtments-prices-in-new-capital/"},
+        {n:"فينيا",        dev:"جيتس للتطوير",             price:"34,500–50,000", note:"R7 | بجوار محور بن زايد ★",            wa:null, ref:"https://betterhouseproperty.com/aprtments-prices-in-new-capital/"},
+        {n:"أرمونيا",      dev:"City Edge",                price:"38,000–55,000", note:"R7 | قرب الحكومي | 87–350م ★",         wa:null, ref:"https://www.judran-eg.com/blog/r7-new-capital/"},
+        {n:"فينشي",       dev:"Hometown Developments",    price:"30,000–50,000", note:"R7 | 130–465م | يبدأ 8.1م ج ★",        wa:null, ref:"https://goldpathway-realty.com/blog/كمبوندات-r7-العاصمة-الإدارية/"},
+        {n:"كتالان",       dev:"جيتس للتطوير",             price:"28,000–42,000", note:"R7 | 40 فدان | 115م+ ★",               wa:null, ref:"https://www.judran-eg.com/blog/r7-new-capital/"},
+        {n:"رودس",         dev:"جاردنز بلازا",             price:"22,000–35,000", note:"R7 | 100 فدان | أمام الدبلوماسي",      wa:null, ref:"https://betterhouseproperty.com/aprtments-prices-in-new-capital/"},
+        {n:"انترادا",      dev:"نيو بلان",                 price:"22,000–35,000", note:"R7/G1 | 35 فدان | 91–350م",            wa:null, ref:"https://www.judran-eg.com/blog/r7-new-capital/"},
+        {n:"La Capital",   dev:"بيراميدز الفرنسية",        price:"22,000–35,000", note:"R7 | يبدأ 25,000/م ★",                 wa:null, ref:"https://goldpathway-realty.com/blog/كمبوندات-r7-العاصمة-الإدارية/"},
+        {n:"سيناريو",      dev:"أكام للتطوير",             price:"18,000–28,000", note:"R7/A2 | 39 فدان | البوسكو 2",          wa:null, ref:"https://goldpathway-realty.com/blog/كمبوندات-r7-العاصمة-الإدارية/"},
+        {n:"أتيكا",        dev:"نيو بلان",                 price:"20,000–32,000", note:"R7 | أمام إكسبو سيتي ★",               wa:null, ref:"https://www.judran-eg.com/blog/r7-new-capital/"},
+       ]},
+      {id:"cap_r5",name:"R5 — نيو جاردن سيتي",color:"#818cf8",avg:32000,
+       compounds:[
+        {n:"هيئة المجتمعات",  dev:"حكومي",    price:"18,000–25,000", note:"طراز فرنسي | متوسط وفوق متوسط",          wa:null, ref:"https://egyptnewcapital.com/"},
+        {n:"مشاريع خاصة R5",  dev:"متعدد",    price:"28,000–55,000", note:"فيلات وتاون هاوس بأسلوب أوروبي",         wa:null, ref:"https://egyptnewcapital.com/"},
+       ]},
+      {id:"cap_r3",name:"R3 — الحي السكني الثالث",color:"#67e8f9",avg:25000,
+       compounds:[
+        {n:"هيئة المجتمعات (حكومي)", dev:"حكومي مباشر", price:"11,250–18,000", note:"طرح 11,250/م ★ | 697 عمارة | 100–180م", wa:null, ref:"https://egyptnewcapital.com/"},
+        {n:"المقصد",                 dev:"دار الأركان",   price:"45,000–65,000", note:"R3 | يبدأ 50,420/م ★ | الأرقى",         wa:null, ref:"https://egyptnewcapital.com/"},
+        {n:"سوليا",                  dev:"حسن علام",      price:"30,000–48,000", note:"R3 | فيلات وتاون هاوس فاخرة",           wa:null, ref:"https://egyptnewcapital.com/"},
+       ]},
+      {id:"cap_r1r2",name:"R1 / R2 — إسكان متوسط",color:"#94a3b8",avg:12000,
+       compounds:[
+        {n:"هيئة المجتمعات", dev:"حكومي",   price:"8,000–14,000",  note:"أقدم أحياء العاصمة | أسعار مدعومة",  wa:null, ref:"https://egyptnewcapital.com/"},
+        {n:"سكن مصر",        dev:"حكومي",   price:"10,000–15,000", note:"تقسيط حكومي مريح",                    wa:null, ref:"https://egyptnewcapital.com/"},
+        {n:"دار مصر",        dev:"حكومي",   price:"9,000–14,000",  note:"إسكان فوق متوسط",                     wa:null, ref:"https://egyptnewcapital.com/"},
+       ]},
+      {id:"cap_mu23",name:"MU23 — إسكان اجتماعي",color:"#4ade80",avg:8000,
+       compounds:[
+        {n:"الإسكان الاجتماعي", dev:"صندوق الإسكان الاجتماعي", price:"5,500–8,000",  note:"الأرخص في العاصمة | محدودو الدخل",   wa:null, ref:"https://egyptnewcapital.com/"},
+        {n:"إسكان الشباب",      dev:"حكومي",                    price:"7,000–10,000", note:"65–90م²",                              wa:null, ref:"https://egyptnewcapital.com/"},
+       ]},
+    ]
+  }
+};
+
+/* ══════════════════════════════════════
+   DISTANCES
+══════════════════════════════════════ */
+// Spotlight: distance from each city TO 3 reference compounds
+const SPOTLIGHT=[
+  {icon:"🏗️",name:"أوكارديا (O Kardia)",sub:"الحي الثامن — مدينة العبور القديمة",color:"#38bdf8",wa:"201023008098",
+   rows:[
+    {city:"العبور",         color:"#38bdf8",km:3, min:5, note:"نفس المدينة"},
+    {city:"الشروق",         color:"#4ade80",km:18,min:18,note:""},
+    {city:"العبور الجديدة", color:"#fb923c",km:24,min:24,note:""},
+    {city:"العاصمة الإدارية",color:"#c084fc",km:49,min:45,note:""},
+   ]},
+  {icon:"🌿",name:"Livyn الشروق",sub:"طريق السويس أمام مدينتي 3 — نخيل للتطوير",color:"#4ade80",wa:"201278509414",
+   rows:[
+    {city:"العبور",         color:"#38bdf8",km:28,min:28,note:""},
+    {city:"الشروق",         color:"#4ade80",km:8, min:10,note:"داخل نطاق المدينة"},
+    {city:"العبور الجديدة", color:"#fb923c",km:35,min:35,note:""},
+    {city:"العاصمة الإدارية",color:"#c084fc",km:22,min:22,note:""},
+   ]},
+  {icon:"🏛️",name:"R8 — De Joya / SAGE Lakes",sub:"الحي السكني الثامن — العاصمة الإدارية",color:"#c084fc",wa:null,
+   rows:[
+    {city:"العبور",         color:"#38bdf8",km:49,min:45,note:""},
+    {city:"الشروق",         color:"#4ade80",km:42,min:38,note:""},
+    {city:"العبور الجديدة", color:"#fb923c",km:45,min:42,note:""},
+    {city:"العاصمة الإدارية",color:"#c084fc",km:5, min:8, note:"داخل العاصمة"},
+   ]},
+];
+
+const TWO_DESTS=[
+  {icon:"✈️",name:"مطار القاهرة الدولي",sub:"CAI — عبر الطريق الدائري",color:"#38bdf8",
+   rows:[
+    {city:"العبور",         color:"#38bdf8",km:22,min:22},
+    {city:"الشروق",         color:"#4ade80",km:32,min:32},
+    {city:"العبور الجديدة", color:"#fb923c",km:30,min:30},
+    {city:"العاصمة الإدارية",color:"#c084fc",km:50,min:48},
+   ]},
+  {icon:"🛍️",name:"أقرب مول كبير لكل مدينة",sub:"مرجع: Cairo Festival City Mall (CFC) على الطريق الدائري",color:"#fbbf24",
+   rows:[
+    {city:"العبور ← كارفور العبور / كابيتال بلازا",  color:"#38bdf8",km:4, min:7},
+    {city:"الشروق ← سكاي بلازا (الجامعة البريطانية)",color:"#4ade80",km:5, min:8},
+    {city:"العبور الجديدة ← مولات داخل الأحياء",      color:"#fb923c",km:4, min:7},
+    {city:"العاصمة ← المنطقة التجارية / Q East",       color:"#c084fc",km:5, min:10},
+   ]},
+];
+
+const DEGLA=[
+  {city:"العبور (القديمة)",  color:"#38bdf8",branch:"فرع هليوبوليس (أرض المطار — صن سيتي مول)",  km:20,min:20,note:"الأقرب فعلياً لسكان العبور القادمين من الشمال"},
+  {city:"مدينة الشروق",     color:"#4ade80",branch:"فرع الشروق (حي الأندلس — مدخل الشروق 2)",    km:4, min:8, note:"أقرب فرع لأي مدينة ★ — تسلّم أرضه ديسمبر 2022"},
+  {city:"العبور الجديدة",   color:"#fb923c",branch:"فرع الشروق (مدخل الشروق 2 — حي الأندلس)",    km:22,min:22,note:"بديل: فرع هليوبوليس ~30 كم"},
+  {city:"العاصمة الإدارية", color:"#c084fc",branch:"فرع اللوتس (التجمع الخامس — شارع التسعين)", km:20,min:22,note:"لا يوجد فرع داخل العاصمة حتى مايو 2026 ⚠️"},
+];
+
+const COMPARE=[
+  {label:"العبور (القديمة)", color:"#38bdf8",matar:22,capital:49,mall:4, degla:20,avgPrice:21700},
+  {label:"مدينة الشروق",    color:"#4ade80",matar:32,capital:42,mall:5, degla:4, avgPrice:18000},
+  {label:"العبور الجديدة",  color:"#fb923c",matar:30,capital:45,mall:4, degla:22,avgPrice:16000},
+  {label:"العاصمة الإدارية",color:"#c084fc",matar:50,capital:0, mall:5, degla:20,avgPrice:38000},
+];
+
+/* ══════════════════════════════════════
+   STATE & HELPERS
+══════════════════════════════════════ */
+let activeCity="obour";
+const fmt=n=>n===0?"0":Number(n).toLocaleString("ar-EG");
+
+function waLink(wa,ref){
+  const parts=[];
+  if(wa) parts.push(`<a class="wa-btn" href="https://wa.me/${wa}" target="_blank">💬 واتساب</a>`);
+  if(ref) parts.push(`<a class="ref-btn" href="${ref}" target="_blank">🔗 تفاصيل</a>`);
+  return parts.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${parts.join("")}</div>` : "";
+}
+
+/* ══════════════════════════════════════
+   RENDER ACCORDION
+══════════════════════════════════════ */
+function renderAccordion(city){
+  return city.districts.map(d=>{
+    const dc=d.color||city.color;
+    const avgRow=`<tr class="avg-row">
+      <td><div class="cname" style="color:${dc}">★ متوسط الحي كله</div></td>
+      <td><span class="price-badge" style="background:color-mix(in srgb,${dc} 18%,transparent);color:${dc}">${fmt(d.avg)} ج/م²</span></td>
+      <td colspan="2"><span style="font-size:10px;color:${dc};opacity:.75">متوسط السوق للحي بالكامل (كمبوندات + أفراد)</span></td>
+    </tr>`;
+    const rows=d.compounds.map(c=>`<tr>
+      <td>
+        <div class="cname">${c.n}</div>
+        <div class="dev-txt">${c.dev}</div>
+        ${waLink(c.wa,c.ref)}
+      </td>
+      <td><span class="price-badge" style="background:color-mix(in srgb,${dc} 12%,transparent);color:${dc}">${c.price}</span></td>
+      <td class="cell-note">${c.note}</td>
+      <td></td>
+    </tr>`).join("");
+    return `<div class="district-block">
+      <div class="district-header" style="background:color-mix(in srgb,${dc} 6%,transparent)" onclick="toggleD('${d.id}')">
+        <div>
+          <div class="district-title" style="color:${dc}">${d.name}</div>
+          <div class="district-meta">متوسط الحي: <strong style="color:${dc}">${fmt(d.avg)}</strong> ج/م²</div>
+        </div>
+        <span class="district-arrow" id="arr-${d.id}">▼</span>
+      </div>
+      <table class="compound-table" id="tbl-${d.id}">
+        <thead><tr><th>الكمبوند / المطور</th><th>سعر المتر (ج)</th><th>ملاحظة</th><th></th></tr></thead>
+        <tbody>${avgRow}${rows}</tbody>
+      </table>
+    </div>`;
+  }).join("");
+}
+window.toggleD=function(id){
+  document.getElementById("tbl-"+id).classList.toggle("open");
+  document.getElementById("arr-"+id).classList.toggle("open");
+};
+
+/* ══════════════════════════════════════
+   RENDER PRICES
+══════════════════════════════════════ */
+function renderPrices(){
+  const city=CITIES[activeCity];
+  const color=city.color;
+  document.documentElement.style.setProperty("--active",color);
+  document.getElementById("city-h2").textContent=`${city.emoji} أسعار المتر — ${city.label}`;
+  document.getElementById("leg-mid").style.background=color;
+
+  document.getElementById("city-tabs").innerHTML=Object.entries(CITIES).map(([k,c])=>
+    `<button class="ctab${k===activeCity?" active":""}" style="${k===activeCity?`border-color:${c.color};background:color-mix(in srgb,${c.color} 14%,transparent);color:${c.color}`:""}" data-city="${k}">${c.emoji} ${c.label}</button>`
+  ).join("");
+
+  document.getElementById("summary").innerHTML=[
+    {lbl:"أقل سعر متر",  val:fmt(city.minAll),       col:"#4ade80"},
+    {lbl:"متوسط المدينة",val:fmt(city.avgCity),       col:color},
+    {lbl:"أقصى سعر متر",val:fmt(city.maxAll)+"+",     col:"#f9a8d4"},
+  ].map(c=>`<div class="card" style="border-color:${c.col}33"><div class="val" style="color:${c.col}">${c.val}</div><div class="lbl">${c.lbl}</div></div>`).join("");
+
+  document.getElementById("price-content").innerHTML=renderAccordion(city);
+  document.querySelectorAll(".ctab").forEach(b=>b.addEventListener("click",()=>{
+    activeCity=b.dataset.city; renderPrices();
+  }));
+}
+
+/* ══════════════════════════════════════
+   RENDER DISTANCES
+══════════════════════════════════════ */
+function renderDistances(){
+  // Spotlight
+  document.getElementById("spotlight-grid").innerHTML=SPOTLIGHT.map(sp=>{
+    const mx=Math.max(...sp.rows.map(r=>r.km));
+    const waHtml=sp.wa?`<a class="wa-btn" href="https://wa.me/${sp.wa}" target="_blank" style="margin-top:4px;font-size:10px">💬 واتساب مباشر</a>`:"";
+    return `<div class="spotlight-card">
+      <div class="spotlight-header" style="background:color-mix(in srgb,${sp.color} 8%,transparent)">
+        <span class="spotlight-icon">${sp.icon}</span>
+        <div>
+          <div class="spotlight-name" style="color:${sp.color}">${sp.name}</div>
+          <div class="spotlight-sub">${sp.sub}</div>
+          ${waHtml}
+        </div>
+      </div>
+      ${sp.rows.map(r=>`<div class="spot-row">
+        <span class="city-badge" style="background:color-mix(in srgb,${r.color} 18%,transparent);color:${r.color}">${r.city}</span>
+        <div class="dist-bar-wrap"><div class="dist-bar-track"><div class="dist-bar-fill" style="width:${r.km===0?0:Math.max(5,Math.round(r.km/mx*100))}%;background:${sp.color}"></div></div></div>
+        <span class="dist-km" style="color:${r.km<=5?"#4ade80":sp.color}">${r.km===0?"داخلها":r.km+" كم"}</span>
+        <span class="dist-min">${r.km===0?"—":r.min+" دق"}</span>
+      </div>`).join("")}
+    </div>`;
+  }).join("");
+
+  // Airport + Mall
+  document.getElementById("two-grid").innerHTML=TWO_DESTS.map(dest=>{
+    const mx=Math.max(...dest.rows.map(r=>r.km));
+    return `<div class="dest-card">
+      <div class="dest-header" style="background:color-mix(in srgb,${dest.color} 8%,transparent)">
+        <span style="font-size:22px">${dest.icon}</span>
+        <div><div style="font-size:13px;font-weight:800;color:${dest.color}">${dest.name}</div>
+        <div style="font-size:10px;color:var(--note)">${dest.sub}</div></div>
+      </div>
+      ${dest.rows.map(r=>`<div class="dest-row">
+        <span class="city-badge" style="background:color-mix(in srgb,${r.color} 18%,transparent);color:${r.color};font-size:9px">${r.city}</span>
+        <div class="dist-bar-wrap"><div class="dist-bar-track"><div class="dist-bar-fill" style="width:${Math.max(5,Math.round(r.km/mx*100))}%;background:${dest.color}"></div></div></div>
+        <span class="dist-km" style="color:${dest.color}">${r.km} كم</span>
+        <span class="dist-min">${r.min} دق</span>
+      </div>`).join("")}
+    </div>`;
+  }).join("");
+
+  // Degla
+  document.getElementById("degla-rows").innerHTML=DEGLA.map(r=>`
+    <div class="degla-row">
+      <span class="city-badge" style="background:color-mix(in srgb,${r.color} 18%,transparent);color:${r.color}">${r.city}</span>
+      <div><div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px">${r.branch}</div>
+      <div style="font-size:10px;color:var(--note)">${r.note}</div></div>
+      <span class="dist-km" style="color:#fb923c">${r.km} كم</span>
+      <span class="dist-min">${r.min} دق</span>
+    </div>`).join("");
+
+  // Compare
+  const bM=Math.min(...COMPARE.map(r=>r.matar)),wM=Math.max(...COMPARE.map(r=>r.matar));
+  const bK=Math.min(...COMPARE.filter(r=>r.capital>0).map(r=>r.capital)),wK=Math.max(...COMPARE.map(r=>r.capital));
+  const bL=Math.min(...COMPARE.map(r=>r.mall)),wL=Math.max(...COMPARE.map(r=>r.mall));
+  const bD=Math.min(...COMPARE.map(r=>r.degla)),wD=Math.max(...COMPARE.map(r=>r.degla));
+  const bP=Math.min(...COMPARE.map(r=>r.avgPrice)),wP=Math.max(...COMPARE.map(r=>r.avgPrice));
+  const cell=(v,b,w)=>`<td class="${v===b?"best":v===w?"worst":""}">${v===0?"داخلها":v+" كم"}</td>`;
+  document.getElementById("compare-table").innerHTML=`
+    <thead><tr><th>المدينة</th><th>✈️ المطار</th><th>🏛️ العاصمة</th><th>🛍️ أقرب مول</th><th>🏊 وادي دجلة</th><th>💰 متوسط م²</th></tr></thead>
+    <tbody>${COMPARE.map(r=>`<tr>
+      <td><span class="score-dot" style="background:${r.color}"></span><strong>${r.label}</strong></td>
+      ${cell(r.matar,bM,wM)}${cell(r.capital,bK,wK)}${cell(r.mall,bL,wL)}${cell(r.degla,bD,wD)}
+      <td class="${r.avgPrice===bP?"best":r.avgPrice===wP?"worst":""}">${fmt(r.avgPrice)} ج</td>
+    </tr>`).join("")}</tbody>`;
+}
+
+/* ══════════════════════════════════════
+   NAV
+══════════════════════════════════════ */
+document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>{
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("page-"+btn.dataset.page).classList.add("active");
+}));
+
+renderPrices();
+renderDistances();
+</script>
+</body>
+</html>
